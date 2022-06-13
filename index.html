@@ -1,0 +1,61 @@
+<!--index.html-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="img-src 'self' data:; default-src 'self' http://XX.XX.XX.XX:8084/mypp/">
+    
+    <link rel="stylesheet" href="main.css" />
+    <link
+      rel="stylesheet"
+      href="./node_modules//bootstrap/dist/css/bootstrap.min.css"
+    />
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <main>
+      <div class="canvas-container">
+        <canvas id="canvas"> </canvas>
+      </div>
+      <div class="sidebar">
+        <div>
+          <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                <button
+                  class="accordion-button collapsed p-2"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseOne"
+                  aria-expanded="false"
+                  aria-controls="collapseOne"
+                >
+                  Elements
+                </button>
+              </h2>
+              <div
+                id="collapseOne"
+                class="accordion-collapse collapse "
+                aria-labelledby="headingOne"
+                data-bs-parent="#accordionExample"
+              >
+                <div class="accordion-body p-0">
+                  <div id="elements" class="pt-2">
+                   
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="selected"></div>
+        </div>
+        <div id="download-btn" href="">Download</div>
+      </div>
+    </main>
+    <script src="./utils.js"></script>
+    <script src="./renderer.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+  </body>
+</html>
