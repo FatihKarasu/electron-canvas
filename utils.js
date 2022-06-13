@@ -32,10 +32,10 @@ const fillText = (element) => {
 const drawAll = (elements) => {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  for (let i = 0; i < elements.length; i++) {
-    let result = drawFunctions[elements[i].type](elements[i]);
+  for (const el in elements) {
+    let result = drawFunctions[elements[el].type](elements[el]);
     if (result === undefined) continue;
-    elements[i] = result;
+    elements[el] = result;
   }
 };
 const drawFunctions = {
@@ -59,7 +59,7 @@ const checkMoveBounds = (element) => {
 };
 
 const checkThreshold = (element, pos) => {
-  if(element.type==="fillText") return "center"
+  if (element.type === "fillText") return "center";
   if (pos.x < element.x + THRESHOLD && pos.y < element.y + THRESHOLD) {
     return "top-left";
   }
@@ -125,9 +125,8 @@ const resizeRight = (e) => {
   selectedElement.width += e.offsetX - pos.x;
   selectedElement = checkResizeBounds(selectedElement);
   printSelected(selectedElement);
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   pos.x = e.offsetX;
 };
@@ -136,9 +135,8 @@ const resizeLeft = (e) => {
   selectedElement.x += e.offsetX - pos.x;
   selectedElement = checkResizeBounds(selectedElement);
   printSelected(selectedElement);
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   pos.x = e.offsetX;
 };
@@ -146,9 +144,8 @@ const resizeBottom = (e) => {
   selectedElement.height += e.offsetY - pos.y;
   selectedElement = checkResizeBounds(selectedElement);
   printSelected(selectedElement);
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   pos.y = e.offsetY;
 };
@@ -157,9 +154,8 @@ const resizeTop = (e) => {
   selectedElement.y += e.offsetY - pos.y;
   selectedElement = checkResizeBounds(selectedElement);
   printSelected(selectedElement);
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   pos.y = e.offsetY;
 };
@@ -169,9 +165,8 @@ const resizeBottomRight = (e) => {
   selectedElement.height += e.offsetY - pos.y;
   selectedElement = checkResizeBounds(selectedElement);
   printSelected(selectedElement);
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   pos.x = e.offsetX;
   pos.y = e.offsetY;
@@ -183,9 +178,8 @@ const resizeBottomLeft = (e) => {
   selectedElement.height += e.offsetY - pos.y;
   selectedElement = checkResizeBounds(selectedElement);
   printSelected(selectedElement);
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   pos.x = e.offsetX;
   pos.y = e.offsetY;
@@ -198,9 +192,8 @@ const resizeTopLeft = (e) => {
   selectedElement.y += e.offsetY - pos.y;
   selectedElement = checkResizeBounds(selectedElement);
   printSelected(selectedElement);
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   pos.x = e.offsetX;
   pos.y = e.offsetY;
@@ -211,9 +204,8 @@ const resizeTopRight = (e) => {
   selectedElement.y += e.offsetY - pos.y;
   selectedElement = checkResizeBounds(selectedElement);
   printSelected(selectedElement);
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   pos.x = e.offsetX;
   pos.y = e.offsetY;
@@ -225,9 +217,8 @@ const moveObject = (e) => {
   selectedElement = checkMoveBounds(selectedElement);
   printSelected(selectedElement);
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   pos.x = e.offsetX;
   pos.y = e.offsetY;

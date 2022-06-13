@@ -6,8 +6,38 @@ const THRESHOLD = 10;
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
 
-var elements = [
-  {
+// var elements = [
+//   {
+//     x: 150,
+//     y: 100,
+//     width: 100,
+//     height: 100,
+//     fill: "#3A5BA0",
+//     stroke: "transparent",
+//     type: "rectangle",
+//   },
+//   {
+//     x: 100,
+//     y: 100,
+//     width: 100,
+//     height: 100,
+//     fill: "blue",
+//     stroke: "transparent",
+//     type: "rectangle",
+//   },
+//   {
+//     x: 100,
+//     y: 300,
+//     height: 30,
+//     width: 0,
+//     font: "30px Arial",
+//     text: "Hello World",
+//     color: "red",
+//     type: "fillText",
+//   },
+// ];
+var elements = {
+  "rect-1": {
     x: 150,
     y: 100,
     width: 100,
@@ -16,7 +46,7 @@ var elements = [
     stroke: "transparent",
     type: "rectangle",
   },
-  {
+  "rect-2": {
     x: 100,
     y: 100,
     width: 100,
@@ -25,7 +55,7 @@ var elements = [
     stroke: "transparent",
     type: "rectangle",
   },
-  {
+  "text-1": {
     x: 100,
     y: 300,
     height: 30,
@@ -35,7 +65,7 @@ var elements = [
     color: "red",
     type: "fillText",
   },
-];
+};
 
 const functions = {
   center: (e) => moveObject(e),
@@ -84,18 +114,17 @@ canvas.addEventListener("mousedown", (e) => {
   pos = { x: e.offsetX, y: e.offsetY };
   selectedElement = null;
   index = null;
-  for (let i = 0; i < elements.length; i++) {
-    if (isColliding(pos, elements[i])) {
-      selectedElement = elements[i];
-      index = i;
+  for (var el in elements) {
+    if (isColliding(pos, elements[el])) {
+      selectedElement = elements[el];
+      index = el;
     }
   }
 
   printSelected(selectedElement);
   if (selectedElement === null) return;
-  elements.splice(index, 1);
-  elements.push(selectedElement);
-  index = elements.length - 1;
+  delete elements[index];
+  elements[index] = selectedElement;
   drawAll(elements);
   selectedFunc = functions[checkThreshold(selectedElement, pos)];
   canvas.addEventListener("mousemove", selectedFunc);
@@ -127,15 +156,14 @@ document.getElementById("download-btn").addEventListener("click", () => {
 const printElements = () => {
   const elementsDiv = document.getElementById("elements");
 
-  for (let i = 0; i < elements.length; i++) {
+  for (const el in elements) {
     let element = document.createElement("div");
     element.classList.add("element", "px-2", "py-1");
-    element.innerText = `${elements[i].type} - ${i}`;
+    element.innerText = `${elements[el].type} - ${el}`;
     element.addEventListener("click", () => {
-      selectedElement = elements[i];
-      elements.splice(i, 1);
-      elements.push(selectedElement);
-      index = elements.length - 1;
+      selectedElement = elements[el];
+      delete elements[el];
+      elements[el] = selectedElement;
       drawAll(elements);
     });
     elementsDiv.appendChild(element);
