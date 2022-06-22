@@ -6,36 +6,6 @@ const THRESHOLD = 10;
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
 
-// var elements = [
-//   {
-//     x: 150,
-//     y: 100,
-//     width: 100,
-//     height: 100,
-//     fill: "#3A5BA0",
-//     stroke: "transparent",
-//     type: "rectangle",
-//   },
-//   {
-//     x: 100,
-//     y: 100,
-//     width: 100,
-//     height: 100,
-//     fill: "blue",
-//     stroke: "transparent",
-//     type: "rectangle",
-//   },
-//   {
-//     x: 100,
-//     y: 300,
-//     height: 30,
-//     width: 0,
-//     font: "30px Arial",
-//     text: "Hello World",
-//     color: "red",
-//     type: "fillText",
-//   },
-// ];
 var elements = {
   "rect-1": {
     x: 150,
@@ -45,15 +15,17 @@ var elements = {
     fill: "#3A5BA0",
     stroke: "transparent",
     type: "rectangle",
+    order: 3,
   },
   "rect-2": {
     x: 100,
     y: 100,
     width: 100,
     height: 100,
-    fill: "blue",
+    fill: "#4C3575",
     stroke: "transparent",
     type: "rectangle",
+    order: 2,
   },
   "text-1": {
     x: 100,
@@ -62,59 +34,46 @@ var elements = {
     width: 0,
     font: "30px Arial",
     text: "Hello World",
-    color: "red",
+    color: "#1B2430",
     type: "fillText",
+    stroke: "transparent",
+    order: 4,
+  },
+  "image-1": {
+    x: 100,
+    y: 100,
+    height: 200,
+    width: 200,
+    src: "public/1.jpg",
+    image: null,
+    stroke: "transparent",
+    type: "image",
+    order: 1,
   },
 };
 
 const functions = {
-  center: (e) => moveObject(e),
-  right: (e) => resizeRight(e),
-  left: (e) => resizeLeft(e),
-  bottom: (e) => resizeBottom(e),
-  top: (e) => resizeTop(e),
-  "bottom-right": (e) => resizeBottomRight(e),
-  "bottom-left": (e) => resizeBottomLeft(e),
-  "top-left": (e) => resizeTopLeft(e),
-  "top-right": (e) => resizeTopRight(e),
+  center: moveObject,
+  right: resizeRight,
+  left: resizeLeft,
+  bottom: resizeBottom,
+  top: resizeTop,
+  "bottom-right": resizeBottomRight,
+  "bottom-left": resizeBottomLeft,
+  "top-left": resizeTopLeft,
+  "top-right": resizeTopRight,
 };
 let selectedFunc = null;
 let pos = { x: 0, y: 0 };
 let selectedElement = null;
 let index = null;
 
-drawAll(elements);
-
-// canvas.addEventListener("click", (e) => {
-
-//   let pos = { x: e.offsetX, y: e.offsetY };
-//   let selectedShape = null;
-//   let index = null;
-//   for (let i = 0; i < shapes.length; i++) {
-//     if (isColliding(pos, shapes[i])) {
-//       selectedShape = shapes[i];
-//       index = i;
-//     }
-//   }
-//   console.log("click");
-//   if (selectedShape !== null) {
-//     canvas.addEventListener("mousedown", () => {
-//       console.log("down");
-//       canvas.addEventListener("mousemove", mouseMoveHandler);
-//     });
-//     canvas.addEventListener("mouseup", () => {
-//       console.log("up");
-//       canvas.removeEventListener("mousemove", mouseMoveHandler);
-//     });
-//   }
-
-// });
-
 canvas.addEventListener("mousedown", (e) => {
   pos = { x: e.offsetX, y: e.offsetY };
   selectedElement = null;
   index = null;
-  for (var el in elements) {
+  const sorted = sortElementsbyOrder(elements);
+  for (var el in sorted) {
     if (isColliding(pos, elements[el])) {
       selectedElement = elements[el];
       index = el;
@@ -123,21 +82,26 @@ canvas.addEventListener("mousedown", (e) => {
 
   printSelected(selectedElement);
   if (selectedElement === null) return;
-  delete elements[index];
-  elements[index] = selectedElement;
+
+  // selectedElement.stroke = "red";
   drawAll(elements);
   selectedFunc = functions[checkThreshold(selectedElement, pos)];
   canvas.addEventListener("mousemove", selectedFunc);
 });
 
 canvas.addEventListener("mouseup", () => {
-  canvas.style.cursor = `default`;
   if (selectedElement === null) return;
+  removeGuides();
+  selectedElement.stroke = "transparent";
+  drawAll(elements);
   canvas.removeEventListener("mousemove", selectedFunc);
 });
 
 canvas.addEventListener("mouseleave", () => {
   if (selectedFunc === null) return;
+  removeGuides();
+  selectedElement.stroke = "transparent";
+  drawAll(elements);
   canvas.removeEventListener("mousemove", selectedFunc);
   selectedFunc = null;
 });
@@ -153,20 +117,6 @@ document.getElementById("download-btn").addEventListener("click", () => {
   download();
 });
 
-const printElements = () => {
-  const elementsDiv = document.getElementById("elements");
+appendElements();
 
-  for (const el in elements) {
-    let element = document.createElement("div");
-    element.classList.add("element", "px-2", "py-1");
-    element.innerText = `${elements[el].type} - ${el}`;
-    element.addEventListener("click", () => {
-      selectedElement = elements[el];
-      delete elements[el];
-      elements[el] = selectedElement;
-      drawAll(elements);
-    });
-    elementsDiv.appendChild(element);
-  }
-};
-printElements();
+drawAll(elements);

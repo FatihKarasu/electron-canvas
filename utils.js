@@ -23,24 +23,66 @@ const fillText = (element) => {
   ctx.fillText(element.text, element.x, element.y);
   let metrics = ctx.measureText(element.text);
   let fontHeight =
-    metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+    metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
   element.width = Math.ceil(metrics.width);
   element.height = fontHeight;
+  ctx.strokeStyle = element.stroke;
+  ctx.strokeRect(element.x, element.y, element.width, element.height);
   return element;
 };
 
+const drawImage = (element) => {
+  if (element.image === null) {
+    const image = new Image();
+    image.src = element.src;
+    element.image = image;
+    image.onload = () => {
+      ctx.strokeStyle = element.stroke;
+      ctx.strokeRect(element.x, element.y, element.width, element.height);
+      ctx.drawImage(
+        element.image,
+        element.x,
+        element.y,
+        element.width,
+        element.height
+      );
+      drawAll(elements)
+    };
+    return element;
+  } else {
+    ctx.strokeStyle = element.stroke;
+    ctx.strokeRect(element.x, element.y, element.width, element.height);
+    ctx.drawImage(
+      element.image,
+      element.x,
+      element.y,
+      element.width,
+      element.height
+    );
+  }
+};
 const drawAll = (elements) => {
+  
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  for (const el in elements) {
+  const sorted = sortElementsbyOrder(elements);
+  for (const el in sorted) {
     let result = drawFunctions[elements[el].type](elements[el]);
     if (result === undefined) continue;
     elements[el] = result;
   }
 };
+const drawGuide = (element) => {
+  ctx.strokeStyle ="#990000"
+  ctx.beginPath();
+  ctx.moveTo(element.x, element.y);
+  ctx.lineTo(element.width, element.height);
+  ctx.stroke();
+};
 const drawFunctions = {
   rectangle: (element) => drawRect(element),
   fillText: (element) => fillText(element),
+  image: (element) => drawImage(element),
+  guide: (element) => drawGuide(element),
 };
 const checkMoveBounds = (element) => {
   if (element.x < 0) {
@@ -118,108 +160,36 @@ const checkResizeBounds = (element) => {
   if (element.y + element.height > CANVAS_WIDTH) {
     element.height = CANVAS_HEIGHT - element.y;
   }
+  if(element.width<30) element.width=30
+  if(element.height<30) element.height=30
   return element;
 };
 
-const resizeRight = (e) => {
-  selectedElement.width += e.offsetX - pos.x;
-  selectedElement = checkResizeBounds(selectedElement);
-  printSelected(selectedElement);
-  delete elements[index];
-  elements[index] = selectedElement;
-  drawAll(elements);
-  pos.x = e.offsetX;
-};
-const resizeLeft = (e) => {
-  if (selectedElement.x != 0) selectedElement.width -= e.offsetX - pos.x;
-  selectedElement.x += e.offsetX - pos.x;
-  selectedElement = checkResizeBounds(selectedElement);
-  printSelected(selectedElement);
-  delete elements[index];
-  elements[index] = selectedElement;
-  drawAll(elements);
-  pos.x = e.offsetX;
-};
-const resizeBottom = (e) => {
-  selectedElement.height += e.offsetY - pos.y;
-  selectedElement = checkResizeBounds(selectedElement);
-  printSelected(selectedElement);
-  delete elements[index];
-  elements[index] = selectedElement;
-  drawAll(elements);
-  pos.y = e.offsetY;
-};
-const resizeTop = (e) => {
-  if (selectedElement.y != 0) selectedElement.height -= e.offsetY - pos.y;
-  selectedElement.y += e.offsetY - pos.y;
-  selectedElement = checkResizeBounds(selectedElement);
-  printSelected(selectedElement);
-  delete elements[index];
-  elements[index] = selectedElement;
-  drawAll(elements);
-  pos.y = e.offsetY;
+const appendElements = () => {
+  const elementsDiv = document.getElementById("elements");
+
+  for (const el in elements) {
+    let element = document.createElement("div");
+    element.classList.add("element", "px-2", "py-1");
+    element.innerText = `${elements[el].type} - ${el}`;
+    element.addEventListener("click", () => {
+      selectedElement = elements[el];
+      updateElements(el);
+      printSelected(selectedElement)
+    });
+    elementsDiv.appendChild(element);
+  }
 };
 
-const resizeBottomRight = (e) => {
-  selectedElement.width += e.offsetX - pos.x;
-  selectedElement.height += e.offsetY - pos.y;
-  selectedElement = checkResizeBounds(selectedElement);
-  printSelected(selectedElement);
-  delete elements[index];
-  elements[index] = selectedElement;
+const updateElements = (key) => {
+  delete elements[key];
+  elements[key] = selectedElement;
   drawAll(elements);
-  pos.x = e.offsetX;
-  pos.y = e.offsetY;
 };
 
-const resizeBottomLeft = (e) => {
-  if (selectedElement.x != 0) selectedElement.width -= e.offsetX - pos.x;
-  selectedElement.x += e.offsetX - pos.x;
-  selectedElement.height += e.offsetY - pos.y;
-  selectedElement = checkResizeBounds(selectedElement);
-  printSelected(selectedElement);
-  delete elements[index];
-  elements[index] = selectedElement;
-  drawAll(elements);
-  pos.x = e.offsetX;
-  pos.y = e.offsetY;
-};
-
-const resizeTopLeft = (e) => {
-  if (selectedElement.x != 0) selectedElement.width -= e.offsetX - pos.x;
-  if (selectedElement.y != 0) selectedElement.height -= e.offsetY - pos.y;
-  selectedElement.x += e.offsetX - pos.x;
-  selectedElement.y += e.offsetY - pos.y;
-  selectedElement = checkResizeBounds(selectedElement);
-  printSelected(selectedElement);
-  delete elements[index];
-  elements[index] = selectedElement;
-  drawAll(elements);
-  pos.x = e.offsetX;
-  pos.y = e.offsetY;
-};
-const resizeTopRight = (e) => {
-  if (selectedElement.y != 0) selectedElement.height -= e.offsetY - pos.y;
-  selectedElement.width += e.offsetX - pos.x;
-  selectedElement.y += e.offsetY - pos.y;
-  selectedElement = checkResizeBounds(selectedElement);
-  printSelected(selectedElement);
-  delete elements[index];
-  elements[index] = selectedElement;
-  drawAll(elements);
-  pos.x = e.offsetX;
-  pos.y = e.offsetY;
-};
-
-const moveObject = (e) => {
-  selectedElement.x += e.offsetX - pos.x;
-  selectedElement.y += e.offsetY - pos.y;
-  selectedElement = checkMoveBounds(selectedElement);
-  printSelected(selectedElement);
-  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  delete elements[index];
-  elements[index] = selectedElement;
-  drawAll(elements);
-  pos.x = e.offsetX;
-  pos.y = e.offsetY;
+const sortElementsbyOrder = (elements) => {
+  const sortable = Object.fromEntries(
+    Object.entries(elements).sort(([, a], [, b]) => a.order - b.order)
+  );
+  return sortable;
 };
